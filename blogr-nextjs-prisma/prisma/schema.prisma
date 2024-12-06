@@ -1,12 +1,20 @@
-// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Adjust this based on your database
+  url      = env("DATABASE_URL")
+}
 
 model Post {
   id        String  @id @default(cuid())
   title     String
   content   String?
   published Boolean @default(false)
-  author    User?@relation(fields:[authorId], references:[id])
-  authorId  String?}
+  author    User?   @relation(fields: [authorId], references: [id])
+  authorId  String?
+}
 
 model Account {
   id                 String  @id @default(cuid())
@@ -24,26 +32,29 @@ model Account {
   oauth_token_secret String?
   oauth_token        String?
 
-  user User @relation(fields:[userId], references:[id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])}
+  @@unique([provider, providerAccountId])
+}
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique@map("session_token")
+  sessionToken String   @unique @map("session_token")
   userId       String   @map("user_id")
   expires      DateTime
-  user         User     @relation(fields:[userId], references:[id], onDelete: Cascade)}
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String?@unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   posts         Post[]
   accounts      Account[]
-  sessions      Session[]}
+  sessions      Session[]
+}
 
 model VerificationToken {
   id         Int      @id @default(autoincrement())
@@ -51,5 +62,5 @@ model VerificationToken {
   token      String   @unique
   expires    DateTime
 
-  @@unique([identifier, token])}
+  @@unique([identifier, token])
 }
